@@ -1,0 +1,398 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <link href="css/main.css" rel="stylesheet" />
+    <title>TrackingOrder</title>
+
+    <!--map+autocomplete-->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+    <!--mapbox-->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css' rel='stylesheet' />
+
+
+    <script>
+        let autocomplete;
+        let address1Field;
+        let address2Field;
+        let postalField;
+
+        function initAutocomplete() {
+            address1Field = document.querySelector("#ship-address");
+            address2Field = document.querySelector("#address2");
+            postalField = document.querySelector("#postcode");
+            // Create the autocomplete object, restricting the search predictions to
+            // addresses in the Sweden
+            autocomplete = new google.maps.places.Autocomplete(address1Field, {
+                componentRestrictions: { country: "SE" },
+                fields: ["address_components", "geometry"],
+                types: ["address"],
+            });
+            address1Field.focus();
+            // When the user selects an address from the drop-down, populate the
+            // address fields in the form.
+            autocomplete.addListener("place_changed", fillInAddress);
+        }
+
+        function fillInAddress() {
+            // Get the place details from the autocomplete object.
+            const place = autocomplete.getPlace();
+            let address1 = "";
+            let postcode = "";
+
+            // Get each component of the address from the place details,
+            // and then fill-in the corresponding field on the form.
+            for (const component of place.address_components) {
+                const componentType = component.types[0];
+
+                switch (componentType) {
+                    case "street_number": {
+                        address1 = `${component.long_name} ${address1}`;
+                        break;
+                    }
+
+                    case "route": {
+                        address1 += component.short_name;
+                        break;
+                    }
+
+                    case "postal_code": {
+                        postcode = `${component.long_name}${postcode}`;
+                        break;
+                    }
+
+                    case "postal_code_suffix": {
+                        postcode = `${postcode}-${component.long_name}`;
+                        break;
+                    }
+                    case "locality":
+                        document.querySelector("#locality").value = component.long_name;
+                        break;
+
+                    case "administrative_area_level_1": {
+                        document.querySelector("#state").value = component.short_name;
+                        break;
+                    }
+                    case "country":
+                        document.querySelector("#country").value = component.long_name;
+                        break;
+                }
+            }
+            address1Field.value = address1;
+            postalField.value = postcode;
+            address2Field.focus();
+        }
+    </script>
+</head>
+
+
+<body>
+    <!--------main content-------->
+    <div class="main">
+        <header>
+            <nav class="container-fluid">
+                <div class="row justify-content-between h-100 px-4 px-sm-5">
+                    <div class="col-8 col-md-5 align-self-center text-left">
+                        <a href="index.html" class="brand">
+                            <img src="img/zara-logo.svg" alt="zara logo" />
+                            Track Your Order!
+                        </a>
+                    </div>
+                    <div class="col-4 align-self-center text-right">
+                        <a href="" data-toggle="modal" data-target="#login-modal">
+                            login
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+
+
+
+        <div id="main-content">
+            <div class="container-fluid">
+                <div class="sections">
+                    <section id="banner-sec">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-md-5 col-xl-4 align-self-center px-5 pt-5 pb-2 p-md-5 text-lef text-white">
+                                <h1>Smart Logistics!</h1>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                    Commodo elit at imperdiet dui accumsan sit amet nulla. Volutpat
+                                    odio facilisis mauris sit amet massa vitae tortor.
+                                </p>
+
+                                <form role="search">
+                                    <div class="form-group my-4">
+                                        <div class="input-group input-group-lg">
+                                            <input class="form-control" id="track-input" placeholder="Tracking Number" type="text" value="">
+                                            <span class="input-group-btn">
+                                                <button type="submit" id="track-btn" class="btn btn-default h-100">
+                                                    <div class="fa fa-binoculars"></div>
+                                                    <span class="d-none d-sm-inline-block">
+                                                        Track
+                                                    </span>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-12 col-md-6 align-self-center text-center px-5">
+                                <img src="img/img-hero.svg" alt="hero image" />
+                            </div>
+                        </div>
+                    </section><!--#banner-sec-->
+
+
+
+
+
+                    <section id="tracking-sec" class="pt-5 mt-0 pt-md-5 mt-md-5">
+                        <div class="row justify-content-center mx-lg-4">
+                            <div class="col-12 col-lg-7 align-self-center">
+                                <div id="arrival-time" class="text-center mx-5">
+                                    <h5>
+                                        <span>Tracking Number:</span>
+                                        <span id="track-number"></span>
+                                    </h5>
+                                    <h2>Expected Delivery Time</h2>
+                                    <p>
+                                        <span>29 May 2021,</span>
+                                        <span>17:30</span>
+                                    </p>
+                                    <img class="mt-3" src="img/img-track.svg" alt="tracking image" />
+                                </div>
+
+
+                                <div id="track-container" class="mx-3 mx-md-5">
+                                    <ul class="position-relative d-flex justify-content-between m-0 p-0 list-unstyled">
+                                        <li class="position-relative achieved" aria-disabled="false" aria-selected="true">
+                                            <div class="title">
+                                                <span class="title-text">
+                                                    Sent from store
+                                                </span>
+                                                <span class="title-date">29 May 2021, 11:30</span>
+                                                <span class="title-number d-flex">01</span>
+                                            </div>
+                                        </li>
+                                        <li class="position-relative achieved" aria-disabled="true">
+                                            <div class="title">
+                                                <span class="title-text">
+                                                    At warehouse
+                                                </span>
+                                                <span class="title-date">29 May 2021, 14:20</span>
+                                                <span class="title-number d-flex">02</span>
+                                            </div>
+                                        </li>
+                                        <li class="position-relative" aria-disabled="true">
+                                            <div class="title">
+                                                <span class="title-text">
+                                                    Arrived!
+                                                </span>
+                                                <span class="title-date"></span>
+                                                <span class="title-number d-flex">03</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-12 col-lg-5 align-self-center">
+                                <div class="address px-5 pt-2 pb-0 px-lg-4 py-lg-0 mb-3">
+                                    <div class="row justify-content-between">
+                                        <div class="col-12 col-sm-8 align-self-top">
+                                            <h6>
+                                                <i class="fa fa-circle small"></i>
+                                                Your Shipping Address
+                                            </h6>
+                                            <p id="address-html">Vasagatan 28, 111 20 Stockholm</p>
+                                            <button class="submit-btn" type="button" data-toggle="modal" data-target="#address-modal">Change</button>
+                                        </div>
+
+                                        <div class="col-12 col-sm-4 align-self-top px-sm-0">
+                                            <h6 class="text-left mt-3 mt-sm-0 mb-2">
+                                                <i class="fa fa-circle small"></i>
+                                                Select the vehicle
+                                            </h6>
+
+                                            <div class="text-left ml-4">
+                                                <div class="select-vehicle">
+                                                    <input class="form-check-input vehicle-input mt-2" name="vehicle-radio" type="radio" id="bike" checked>
+                                                    <label class="form-check-label bike-label mr-3" for="bike">
+                                                        <i class="fa fa-bicycle"></i>
+                                                        Bike
+                                                    </label>
+                                                </div>
+                                                <div class="select-vehicle">
+                                                    <input class="form-check-input vehicle-input mt-2" name="vehicle-radio" type="radio" id="car">
+                                                    <label class="form-check-label car-label mr-3" for="car">
+                                                        <i class="fa fa-car"></i>
+                                                        Car
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--<div class="iframe-container px-5 pt-2 pb-5 px-lg-2 w-100" style="height: 395px;">
+                                    <iframe class="h-100 w-100" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2035.0390949676107!2d18.055932815560713!3d59.332301117827036!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465f9d60ea94533b%3A0xba49b60007343789!2sVasagatan%2028%2C%20111%2020%20Stockholm%2C%20Sweden!5e0!3m2!1sen!2s!4v1622200889878!5m2!1sen!2s" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                                </div>-->
+                                <div id="map" class="mb-2 mb-lg-5 px-lg-2 mx-auto">
+                                    <!--<div class="marker location"></div>-->
+                                </div>
+                            </div>
+                        </div>
+                    </section><!--#tracking-sec-->
+
+
+
+
+
+
+                    <section id="intro-sec">
+                        <div class="px-4 py-5 p-sm-5">
+                            <h2 class="text-center mb-5">
+                                Where is My Order?
+                            </h2>
+                            <div class="row justify-content-center">
+                                <div class="col-12 col-md-4 align-self-top text-center px-xl-4">
+                                    <img class="mb-4 first" src="img/img-intro-sent.svg" alt="sent image" />
+                                    <h4>Package Sent From Store</h4>
+                                    <p class="text-justify">
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                        Commodo elit at imperdiet dui accumsan sit amet nulla. Volutpat odio
+                                        facilisis mauris sit amet massa
+                                    </p>
+                                </div>
+                                <div class="col-12 col-md-4 align-self-top text-center px-xl-4">
+                                    <img class="mb-4" src="img/img-intro-warehouse.svg" alt="warehouse image" />
+                                    <h4>Package at Warehouse</h4>
+                                    <p class="text-justify">
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                        Commodo elit at imperdiet dui accumsan sit amet nulla. Volutpat odio
+                                        facilisis mauris sit amet massa vitae tortor. In massa tempor nec feugiat
+                                        nisl pretium fusce id. Amet dictum sit amet justo
+                                    </p>
+                                </div>
+                                <div class="col-12 col-md-4 align-self-top text-center px-xl-4">
+                                    <img class="mb-4" src="img/img-intro-delivered.svg" alt="delivered image" />
+                                    <h4>Package Arrived to Destination</h4>
+                                    <p class="text-justify">
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                        Commodo elit at imperdiet dui accumsan sit amet nulla.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section><!--#intro-sec-->
+                </div><!--.sections-->
+            </div><!--.container-fluid-->
+        </div><!--.main-content-->
+
+
+
+        <footer class="text-center text-white">
+            Designed & Developed by <a href="https://www.linkedin.com/in/zahra-zamanian/" target="_blank">Zara Zamanian</a>
+        </footer>
+
+
+        <div id="fixed-track">
+            <i class="fa fa-binoculars text-white ml-4"></i>
+        </div>
+    </div><!--.main-->
+
+
+
+    <!--------modals-------->
+    <div class="modal fade" id="login-modal" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="form-group">
+                            <input type="text" class="form-control text-center" id="username" placeholder="Username" required>
+                        </div>
+                        <div class="form-group mt-4">
+                            <input type="password" class="form-control text-center" id="pass" placeholder="Password" required>
+                        </div>
+
+                        <div class="form-group links text-right">
+                            <label>
+                                <input type="checkbox" checked="checked" id="remember-me">
+                                <span>Remember me</span>
+                            </label>
+
+                            <a href="" class="pass-forgotten float-left">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="submit-btn mt-4">login</button>
+                    </form>
+                </div> <!--modal-body-->
+            </div> <!--modal-content-->
+        </div> <!--modal-dialog-->
+    </div><!--#login-modal-->
+
+
+    <div class="modal fade" id="address-modal" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-body">
+                    <form id="address-form" class="p-2 p-sm-5 text-left" method="get" autocomplete="off">
+                        <label class="w-100">
+                            <span class="form-label">Deliver to*</span>
+                            <input class="address-input w-100 py-2 px-3" id="ship-address" name="ship-address" required autocomplete="off" />
+                        </label>
+                        <label class="w-100">
+                            <span class="form-label">Apartment, unit, suite, or floor #</span>
+                            <input class="address-input w-100 py-2 px-3" id="address2" name="address2" />
+                        </label>
+                        <label class="w-100">
+                            <span class="form-label">City*</span>
+                            <input class="address-input py-2 px-3 w-100" id="locality" name="locality" required />
+                        </label>
+                        <label class="w-100">
+                            <span class="form-label">State/Province*</span>
+                            <input class="address-input py-2 px-3 w-100" id="state" name="state" required />
+                        </label>
+                        <label class="w-100" for="postal_code">
+                            <span class="form-label">Postal code*</span>
+                            <input class="address-input py-2 px-3 w-100" id="postcode" name="postcode" required />
+                        </label>
+                        <label class="w-100">
+                            <span class="form-label">Country/Region*</span>
+                            <input class="address-input py-2 px-3 w-100" id="country" name="country" required />
+                        </label>
+
+                        <div class="text-center mt-4">
+                            <button id="address-btn" type="submit" data-dismiss="modal" class="submit-btn">Save</button>
+                        </div>
+                    </form>
+                </div> <!--modal-body-->
+            </div> <!--modal-content-->
+        </div> <!--modal-dialog-->
+    </div><!--#address-modal-->
+
+
+
+    <!--------scripts-------->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initAutocomplete&libraries=places&v=weekly" async></script>
+    <script src="Scripts/jquery-3.0.0.min.js"></script>
+    <script src="Scripts/popper.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <script src="java-script.js"></script>
+</body>
+</html>
