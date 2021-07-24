@@ -1,5 +1,5 @@
-﻿# Zara-TrackingOrder
-"TrackingOrder" is a responsive web application for tracking customer’s delivery.
+﻿# Zara-TrackYourOrder
+"TrackYourOrder" is a responsive web application for tracking customer’s delivery.
 
 ## Usage
 Open the project folder and run the "index.html" file!
